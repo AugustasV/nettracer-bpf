@@ -14,29 +14,31 @@ pullSecrets:
 - registry: hub.docker.com
   username: ${REGISTRY_USERNAME}
   password: ${REGISTRY_PASSWORD}
+
 deployments:
-- name: febe
+- name: nettracer-test
+  # This deployment uses `helm` but you can also define `kubectl` deployments or kustomizations
   helm:
-    chart:
-      name: ${DEVSPACE_USER_HOME}/.devspace/dependencies/external/my-helm-charts/febe
+    # We are deploying the so-called Component Chart: https://devspace.sh/component-chart/docs
+    componentChart: true
+    # Under `values` we can define the values for this Helm chart used during `helm install/upgrade`
+    # You may also use `valuesFiles` to load values from files, e.g. valuesFiles: ["values.yaml"]
     values:
-      frontend:
-        image:
-          name: image(fe.default) 
-          tag: tag(fe.default) 
-      backend:
-        image:
-          name: ${APPLICATION}/${IMAGE}
-          tag: ${DEVSPACE_RANDOM}
+      containers:
+      - image: image(app):tag(app) # Use the `app` image (see `images`) and the tag DevSpace generates during image building in your Helm values
+        command: ["sleep"]
+        args: ["9999999"]
+      service:
+        ports:
+        - port: 3000
 
 dependencies:
-- name: fe
+- name: main-repo
   source:
     git: https://github.com/augustasv/nettracer-bpf
-    branch: master
-    subPath: .github/workflows/
+    branch: ${BRANCH}
     cloneArgs:
-      - -c 
+      - -c
       - core.longpaths=true
   profile: do-not-include-dependencies-and-deployments-and-hooks
 
@@ -56,14 +58,14 @@ profiles:
   replace:
     images:
       default:
-        dockerfile: Dockerfile  
+        dockerfile: Dockerfile
         context: ../
         image: "${IMAGE}/${APPLICATION}"
         tags:
           - "${DEVSPACE_RANDOM}"
         build:
-          kaniko:
-            cache: true
+          docker:
+            skipPush: true
             resources:
               limits:
                 memory: "512Mi"
@@ -73,8 +75,6 @@ profiles:
   - profile: remote
   patches:
   - op: remove
-    path: dependencies.name=fe
-  - op: remove
-    path: deployments.name=febe
+    path: dependencies.name=main-repo
   - op: remove
     path: hooks.name=helm
