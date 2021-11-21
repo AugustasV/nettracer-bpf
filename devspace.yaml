@@ -10,7 +10,10 @@ vars:
 - name: SPACE
   source: none
   default: "default"
-
+pullSecrets:
+- registry: hub.docker.com
+  username: ${REGISTRY_USERNAME}
+  password: ${REGISTRY_PASSWORD}
 deployments:
 - name: febe
   helm:
