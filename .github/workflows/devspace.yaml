@@ -1,0 +1,77 @@
+version: v1beta11
+
+vars:
+- name: APPLICATION
+  source: none
+  default: "be"  
+- name: IMAGE
+  source: none
+  default: "augustris/nettracer-bpf"
+- name: SPACE
+  source: none
+  default: "default"
+
+deployments:
+- name: febe
+  helm:
+    chart:
+      name: ${DEVSPACE_USER_HOME}/.devspace/dependencies/external/my-helm-charts/febe
+    values:
+      frontend:
+        image:
+          name: image(fe.default) 
+          tag: tag(fe.default) 
+      backend:
+        image:
+          name: ${APPLICATION}/${IMAGE}
+          tag: ${DEVSPACE_RANDOM}
+
+dependencies:
+- name: fe
+  source:
+    git: https://github.com/augustasv/nettracer-bpf
+    branch: master
+    subPath: .github/workflows/
+    cloneArgs:
+      - -c 
+      - core.longpaths=true
+  profile: do-not-include-dependencies-and-deployments-and-hooks
+
+hooks:
+ - name: helm
+   events: ["before:render"]
+   command: |
+     git clone --depth=1 -b ${BRANCH} https://github.com/augustasv/nettracer-bpf "${DEVSPACE_USER_HOME}/.devspace/dependencies/external/" || cd "${DEVSPACE_USER_HOME}/.devspace/dependencies/external/" && git pull --force
+   os: linux,windows
+  
+commands:
+- name: remote-development
+  command: "devspace dev -p remote -n ${SPACE} --kube-context ondemand"
+
+profiles:
+- name: remote
+  replace:
+    images:
+      default:
+        dockerfile: Dockerfile  
+        context: ../
+        image: "${IMAGE}/${APPLICATION}"
+        tags:
+          - "${DEVSPACE_RANDOM}"
+        build:
+          kaniko:
+            cache: true
+            resources:
+              limits:
+                memory: "512Mi"
+                cpu: "500m"
+- name: do-not-include-dependencies-and-deployments-and-hooks
+  parents: 
+  - profile: remote
+  patches:
+  - op: remove
+    path: dependencies.name=fe
+  - op: remove
+    path: deployments.name=febe
+  - op: remove
+    path: hooks.name=helm
