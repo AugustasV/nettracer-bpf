@@ -10,27 +10,18 @@ vars:
 - name: SPACE
   source: none
   default: "default"
-pullSecrets:
-- registry: hub.docker.com
-  username: ${REGISTRY_USERNAME}
-  password: ${REGISTRY_PASSWORD}
+- name: BRANCH
+  default: "testing"
 
 deployments:
 - name: nettracer-test
-  # This deployment uses `helm` but you can also define `kubectl` deployments or kustomizations
   helm:
-    # We are deploying the so-called Component Chart: https://devspace.sh/component-chart/docs
-    componentChart: true
-    # Under `values` we can define the values for this Helm chart used during `helm install/upgrade`
-    # You may also use `valuesFiles` to load values from files, e.g. valuesFiles: ["values.yaml"]
+    chart:
+      name: ${DEVSPACE_USER_HOME}/nettracer-bpf/helm/nettracer-bpf
     values:
-      containers:
-      - image: image(app):tag(app) # Use the `app` image (see `images`) and the tag DevSpace generates during image building in your Helm values
-        command: ["sleep"]
-        args: ["9999999"]
-      service:
-        ports:
-        - port: 3000
+      image:
+        repository: ${APPLICATION}/${IMAGE}
+        tag: ${DEVSPACE_RANDOM}
 
 dependencies:
 - name: main-repo
@@ -38,7 +29,7 @@ dependencies:
     git: https://github.com/augustasv/nettracer-bpf
     branch: ${BRANCH}
     cloneArgs:
-      - -c
+      - -c 
       - core.longpaths=true
   profile: do-not-include-dependencies-and-deployments-and-hooks
 
@@ -46,7 +37,7 @@ hooks:
  - name: helm
    events: ["before:render"]
    command: |
-     git clone --depth=1 -b ${BRANCH} https://github.com/augustasv/nettracer-bpf "${DEVSPACE_USER_HOME}/.devspace/dependencies/external/" || cd "${DEVSPACE_USER_HOME}/.devspace/dependencies/external/" && git pull --force
+     git clone --depth=1 -b master https://github.com/augustasv/nettracer-bpf "${DEVSPACE_USER_HOME}/.devspace/dependencies/external/" || cd "${DEVSPACE_USER_HOME}/.devspace/dependencies/external/" && git pull --force
    os: linux,windows
   
 commands:
