@@ -14,14 +14,12 @@ vars:
   default: "testing"
 
 deployments:
-- name: nettracer-test
+- name: nettracer-dependency
   helm:
-    chart:
-      name: ${DEVSPACE_USER_HOME}/nettracer-bpf/helm/nettracer-bpf
+    componentChart: true
     values:
-      image:
-        repository: ${APPLICATION}/${IMAGE}
-        tag: ${DEVSPACE_RANDOM}
+      containers:
+      - image: ${IMAGE}
 
 dependencies:
 - name: main-repo
