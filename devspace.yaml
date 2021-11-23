@@ -27,13 +27,7 @@ dev:
   terminal:
     imageSelector: ${IMAGE} 
     command:
-    - ./devspace_start.sh
-dependencies:
-- source:
-    git: https://github.com/augustasv/nettracer-bpf
-    branch: ${BRANCH}
-  ignoreDependencies: true 
- 
+    - ./devspace_start.sh 
   replacePods:
   - imageSelector: ${IMAGE} 
     replaceImage: loftsh/alpine:latest
@@ -50,10 +44,15 @@ dependencies:
       path: spec.containers[0].securityContext
 
 profiles:
- 
 - name: production
   merge:
     images:
       app:
         image: ${IMAGE} 
         dockerfile: ./Dockerfile
+        
+dependencies:
+- source:
+    git: https://github.com/augustasv/nettracer-bpf
+    branch: ${BRANCH}
+  ignoreDependencies: true 
