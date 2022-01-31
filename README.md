@@ -9,7 +9,7 @@ NetTracer does not have any runtime dependencies on kernel headers, nor it is ti
 Only Linux kernels of version 4.15 or above are supported. NetTracer was inspired by [weaveworks' tcptracer-bpf](https://github.com/weaveworks/tcptracer-bpf).
 
 ## Features
-
+ 
 - Tracing of TCP events: connect, accept and close
 - Collecting metrics about each traced connection (see _Metrics_ below)
 - High performance - written in C and C++
