@@ -8,30 +8,61 @@ on:
 
 jobs:
   build:
+<<<<<<< HEAD
     name: Build docker image
     runs-on: ubuntu-latest
     steps:
     # required for buildx and multi platform build
       - uses: actions/checkout@v2
+=======
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    # - name: make
+    #   run: make
+  push_to_registry:
+    name: Push Docker image to GitHub Packages
+    runs-on: ubuntu-latest
+    steps:
+    # required for buildx and multi platform build
+>>>>>>> 1bbb37c6b9a65088bd0bb104536386796d506631
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+<<<<<<< HEAD
       - uses: actions/checkout@v2
       - name: Set the value
         id: version_env
         run: |
           cat version.properties >> $GITHUB_ENV
+=======
+      - name: Log in to Docker Hub 
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.CR_USERNAME }}
+          password: ${{ secrets.CR_PAT }}
+      - uses: actions/checkout@v2
+>>>>>>> 1bbb37c6b9a65088bd0bb104536386796d506631
       - name: Build container image
         id: docker_build
         uses: docker/build-push-action@v2
         with:
           context: .
           file: ./Dockerfile
+<<<<<<< HEAD
           push: false
           platforms: linux/amd64,linux/arm64
           tags: |
             nettracer-bpf:latest
             nettracer-bpf:${{ env.version }}
+=======
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ${{ secrets.CR_USERNAME }}/nettracer-bpf:latest
+            ${{ secrets.CR_USERNAME }}/nettracer-bpf:${{ github.run_number }}
+>>>>>>> 1bbb37c6b9a65088bd0bb104536386796d506631
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
