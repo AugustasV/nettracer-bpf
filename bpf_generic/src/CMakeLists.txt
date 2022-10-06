@@ -5,6 +5,7 @@ set(SOURCES
 	log.cpp
 	kernel_version.cpp
 	maps_loading.cpp
+	perf_event.cpp
 	system_calls.cpp
 )
 
@@ -12,6 +13,7 @@ set(HEADERS
 	bpf_loading.h
 	bpf_wrapper.h
 	elf_utils.h
+	errors.h
 	log.h
 	kernel_version.h
 	maps_loading.h
